@@ -1,0 +1,2 @@
+[mcserver1]
+1.1.1.1 ansible_user=ubuntu ansible_python_interpreter=/usr/bin/python3

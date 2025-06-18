@@ -1,0 +1,32 @@
+{
+    "version": "1.19",
+    "type": "datapacks",
+    "packs": {
+      "survival": [
+        "afk display",
+        "armor statues",
+        "coordinates hud",
+        "durability ping",
+        "multiplayer sleep",
+        "nether portal coords",
+        "track raw statistics",
+        "track statistics",
+        "villager workstation highlights"
+      ],
+      "mobs": [
+        "anti enderman grief",
+        "double shulker shells",
+        "dragon drops",
+        "silence mobs",
+        "more mob heads"
+      ],
+      "items": [
+        "player head drops",
+        "redstone rotation wrench",
+        "terracotta rotation wrench"
+    ],
+    "hermitcraft": [
+        "wandering trades hermit edition"
+    ]
+    }
+}

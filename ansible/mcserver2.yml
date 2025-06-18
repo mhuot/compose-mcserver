@@ -1,0 +1,54 @@
+---
+- name: Setup new minecraftworld
+  hosts: mcserver1
+  vars:
+    git_repo: "git@github.com:mhuot/compose-mcserver.git" # Your private repo URL
+    deploy_key_path: "/home/{{ ansible_user }}/.ssh/oci-mcserver"     # Path to your private SSH key
+    mcbasedir: "{{ ansible_user_dir }}/mc-newworld"
+  become: true
+  gather_facts: false
+  tasks:
+        
+    - name: Copy oci-mcserver private key
+      become: false
+      ansible.builtin.copy:
+        src: oci-mcserver
+        dest: "{{ deploy_key_path }}"
+        mode: '0600'
+
+    - name: Clone repository
+      become: false
+      ansible.builtin.git:
+        repo: "{{ git_repo }}"
+        dest: "{{ mcbasedir }}"
+        version: main  # Or specify a branch/tag if needed
+        key_file: "{{ deploy_key_path }}"
+        accept_hostkey: yes
+
+    - name: Create directories
+      become: false
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items:
+        - "{{ mcbasedir }}" 
+        - "{{ mcbasedir }}/data"
+        - "{{ mcbasedir }}/data/logs"
+        - "{{ mcbasedir }}/data/config"
+
+    - name: Copy vanilla tweaks files from repository
+      become: false
+      ansible.builtin.copy:
+        src: "{{ mcbasedir }}/{{ item }}"
+        dest: "{{ mcbasedir }}/data/config/{{ item }}"
+        mode: '0644'
+        remote_src: true
+      with_items:
+        - vt-datapacks.json
+        - vt-crafting.json
+
+    - name: Start Minecraft server
+      become: false
+      community.docker.docker_compose:
+        project_src: "{{ mcbasedir }}"

@@ -1,0 +1,9 @@
+{
+    "version": "1.19",
+    "type": "craftingtweaks",
+    "packs": {
+      "quality of life": [
+        "universal dyeing"
+      ]
+    }
+}

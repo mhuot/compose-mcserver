@@ -1,0 +1,4 @@
+[mcservers]
+{% for host_name, host_config in ansible.hosts.items() -%}
+{{ host_name }} ansible_host={{ host_config.ansible_host }} ansible_user={{ host_config.ansible_user }}{% if host_config.ansible_ssh_private_key_file %} ansible_ssh_private_key_file={{ host_config.ansible_ssh_private_key_file }}{% endif %}
+{% endfor %}

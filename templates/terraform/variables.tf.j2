@@ -1,0 +1,43 @@
+# Oracle Cloud Infrastructure Variables
+variable "oci_tenancy_ocid" {
+  description = "OCID of the tenancy"
+  type        = string
+  default     = "{{ terraform.oci.tenancy_ocid }}"
+}
+
+variable "oci_user_ocid" {
+  description = "OCID of the user"
+  type        = string
+  default     = "{{ terraform.oci.user_ocid }}"
+}
+
+variable "oci_private_key_path" {
+  description = "Path to the OCI private key file"
+  type        = string
+  default     = "{{ terraform.oci.private_key_path }}"
+}
+
+variable "oci_fingerprint" {
+  description = "Fingerprint of the OCI API key"
+  type        = string
+  default     = "{{ terraform.oci.fingerprint }}"
+}
+
+variable "oci_region" {
+  description = "OCI region"
+  type        = string
+  default     = "{{ terraform.oci.region }}"
+}
+
+# Instance Configuration
+variable "instance_name" {
+  description = "Name tag for the compute instance"
+  type        = string
+  default     = "{{ minecraft.server_name }}-instance"
+}
+
+variable "minecraft_port" {
+  description = "Port for the Minecraft server"
+  type        = number
+  default     = {{ minecraft.port }}
+}

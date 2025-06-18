@@ -1,0 +1,52 @@
+version: '3.4'
+
+services:
+  {{ minecraft.container_name }}:
+    image: itzg/minecraft-server:latest
+    container_name: {{ minecraft.container_name }}
+    volumes:
+      - {{ paths.data_dir }}:/data
+      - {{ paths.logs_dir }}:/data/logs
+      - {{ paths.config_dir }}:/data/config
+    environment:
+      {% if minecraft.enable_packwiz and minecraft.packwiz_url -%}
+      PACKWIZ_URL: "{{ minecraft.packwiz_url }}"
+      {% endif -%}
+      TYPE: "{{ minecraft.type }}"
+      DEBUG_EXEC: "true"
+      DEBUG_MEMORY: "true"
+      EULA: "true"
+      VERSION: "{{ minecraft.version }}"
+      DIFFICULTY: "{{ minecraft.difficulty }}"
+      MEMORY: "{{ minecraft.memory }}"
+      OPS: "{{ minecraft.ops }}"
+      TZ: "{{ ansible.timezone | default('UTC') }}"
+      SERVER_NAME: "{{ minecraft.server_name }}"
+      FORCE_GAMEMODE: "{{ minecraft.force_gamemode | lower }}"
+      MOTD: "{{ minecraft.motd }}"
+      ALLOW_FLIGHT: "{{ minecraft.allow_flight | lower }}"
+      {% if minecraft.use_aikar_flags -%}
+      USE_AIKAR_FLAGS: "true"
+      {% endif -%}
+      {% if minecraft.enable_vanillatweaks and minecraft.vanillatweaks_files -%}
+      VANILLATWEAKS_FILE: {% for file in minecraft.vanillatweaks_files %}/data/config/{{ file }}{% if not loop.last %},{% endif %}{% endfor %}
+      REMOVE_OLD_VANILLATWEAKS: "TRUE"
+      {% endif -%}
+      INITIAL_ENABLED_PACKS: "vanilla"
+      RENDER_DISTANCE: {{ minecraft.render_distance }}
+      SIMULATION_DISTANCE: {{ minecraft.simulation_distance }}
+      {% if minecraft.game_rules -%}
+      {% for rule, value in minecraft.game_rules.items() -%}
+      GAMERULE: "{{ rule }} {{ value | lower }}"
+      {% endfor -%}
+      {% endif -%}
+      {% if minecraft.startup_commands -%}
+      RCON_CMDS_STARTUP: |-
+        {% for command in minecraft.startup_commands -%}
+        {{ command }}
+        {% endfor -%}
+      {% endif %}
+    ports:
+      - {{ minecraft.port }}:25565
+      - {{ minecraft.rcon_port }}:25575
+    restart: unless-stopped

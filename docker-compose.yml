@@ -1,0 +1,40 @@
+version: '3.4'
+
+services:
+  mc-newworld:
+    image: itzg/minecraft-server:latest
+    #build: itzg/minecraft-server:latest
+    container_name: mc-newworld
+    volumes:
+    - ./data:/data
+    - ./data/logs:/data/logs
+    - ./data/config:/data/config
+    environment:
+      PACKWIZ_URL: "http://minecraft.geekpark.com:38080/newworld/server/pack.toml"
+      TYPE: "FABRIC"
+      DEBUG_EXEC:  "true"
+      DEBUG_MEMORY: "true"
+      EULA: "true"
+      VERSION: "LATEST"
+      DIFFICULTY: "hard"
+      MEMORY: "12G"
+      OPS: "mhuot,ZombieSquirrel,Lexiphanic,dashd4sh"
+      TZ: "America/Chicago"
+      SERVER_NAME: "mc-newworld"
+      FORCE_GAMEMODE: "true"
+      MOTD: "New world"
+      ALLOW_FLIGHT: "true"
+      USE_AIKAR_FLAGS: "true"
+      VANILLATWEAKS_FILE: /data/config/vt-datapacks.json,/data/config/vt-crafting.json
+      REMOVE_OLD_VANILLATWEAKS: "TRUE"
+      INITIAL_ENABLED_PACKS: "vanilla"
+      RENDER_DISTANCE: 25
+      SIMULATION_DISTANCE: 25
+      GAMERULE: "doFireTick false"
+      RCON_CMDS_STARTUP:  |-
+        gamerule doFireTick false
+    ports:
+      - 32222:25565
+      - 25585:25585
+      - 25575:25575
+    restart: unless-stopped

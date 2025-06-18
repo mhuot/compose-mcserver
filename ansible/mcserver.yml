@@ -1,0 +1,113 @@
+---
+- name: Setup new minecraftworld
+  hosts: mcserver1
+  vars:
+    git_repo: "git@github.com:mhuot/compose-mcserver.git" # Your private repo URL
+    deploy_key_path: "/home/{{ ansible_user }}/.ssh/oci-mcserver"     # Path to your private SSH key
+    mcbasedir: "{{ ansible_user_dir }}/mc-newworld"
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Do setup
+      ansible.builtin.setup:
+      become: false
+
+    - name: Set timezone to America/Chicago
+      community.general.timezone:
+        name: America/Chicago
+
+    - name: Install curl and ca-certificates
+      ansible.builtin.apt:
+        name:
+          - curl
+          - ca-certificates
+        state: present
+        update_cache: yes
+
+    - name: Download Docker GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /tmp/docker.gpg
+
+    - name: Add Docker GPG key
+      ansible.builtin.command: gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg /tmp/docker.gpg
+      when: not ("/usr/share/keyrings/docker-archive-keyring.gpg") is exists
+
+    - name: Add Docker repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=arm64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Update apt and install packages (python3-pip, docker-ce, docker-compose-plugin, git)
+      ansible.builtin.apt:
+        name:
+          - python3-pip
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+          - docker-compose
+          - git
+          - python3-docker
+          - vim
+        state: present
+        update_cache: yes
+
+    - name: Ensure group "docker" exists
+      ansible.builtin.group:
+        name: docker
+        state: present
+
+    - name: Add ansible to docker group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Reset ssh connection to allow user changes to affect ansible user
+      ansible.builtin.meta:
+        reset_connection
+        
+    - name: Copy oci-mcserver private key
+      become: false
+      ansible.builtin.copy:
+        src: oci-mcserver
+        dest: "{{ deploy_key_path }}"
+        mode: '0600'
+
+    - name: Clone repository
+      become: false
+      ansible.builtin.git:
+        repo: "{{ git_repo }}"
+        dest: "{{ mcbasedir }}"
+        version: main  # Or specify a branch/tag if needed
+        key_file: "{{ deploy_key_path }}"
+        accept_hostkey: yes
+
+    - name: Create directories
+      become: false
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items:
+        - "{{ mcbasedir }}" 
+        - "{{ mcbasedir }}/data"
+        - "{{ mcbasedir }}/data/logs"
+        - "{{ mcbasedir }}/data/config"
+
+    - name: Copy vanilla tweaks files from repository
+      become: false
+      ansible.builtin.copy:
+        src: "{{ mcbasedir }}/{{ item }}"
+        dest: "{{ mcbasedir }}/data/config/{{ item }}"
+        mode: '0644'
+        remote_src: true
+      with_items:
+        - vt-datapacks.json
+        - vt-crafting.json
+
+    - name: Start Minecraft server
+      become: false
+      community.docker.docker_compose:
+        project_src: "{{ mcbasedir }}"

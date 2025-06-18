@@ -1,0 +1,85 @@
+# Example configuration for compose-mcserver
+# Copy this file to config.yaml and customize the values below
+
+# Minecraft Server Configuration
+minecraft:
+  server_name: "mc-server"
+  container_name: "mc-server"
+  motd: "Welcome to My Minecraft Server"
+  difficulty: "normal"  # peaceful, easy, normal, hard
+  version: "LATEST"     # or specific version like "1.20.1"
+  type: "VANILLA"       # VANILLA, FABRIC, FORGE, etc.
+  memory: "4G"
+  
+  # Server operators (comma-separated list of usernames)
+  ops: "admin"
+  
+  # Network settings
+  port: 25565
+  rcon_port: 25575
+  
+  # Game settings
+  allow_flight: true
+  force_gamemode: true
+  render_distance: 16
+  simulation_distance: 16
+  use_aikar_flags: true
+  
+  # Optional features (set to false to disable)
+  enable_packwiz: false
+  packwiz_url: ""
+  
+  enable_vanillatweaks: false
+  vanillatweaks_files:
+    - "vt-datapacks.json"
+    - "vt-crafting.json"
+  
+  # Game rules (optional)
+  game_rules:
+    doFireTick: false
+  
+  # Startup commands (optional)
+  startup_commands: []
+
+# Infrastructure Configuration
+terraform:
+  enabled: false
+  
+  # Oracle Cloud Infrastructure (OCI) settings
+  oci:
+    tenancy_ocid: ""
+    user_ocid: ""
+    private_key_path: "~/.ssh/oci.pem"
+    fingerprint: ""
+    region: "us-chicago-1"
+  
+
+# Ansible Configuration
+ansible:
+  enabled: false
+  
+  # Target host configuration
+  hosts:
+    mcserver1:
+      ansible_host: "your-server-ip"
+      ansible_user: "ubuntu"
+      ansible_ssh_private_key_file: "~/.ssh/your-key.pem"
+  
+  # Deployment settings
+  git_repo: "https://github.com/yourusername/compose-mcserver.git"
+  deploy_key_path: "~/.ssh/deploy-key"
+  mcbasedir: "/home/ubuntu/mc-server"
+  
+  # System settings
+  timezone: "America/Chicago"
+  
+  # Docker settings
+  install_docker: true
+  docker_compose_version: "latest"
+
+# File paths
+paths:
+  data_dir: "./data"
+  logs_dir: "./data/logs"
+  config_dir: "./data/config"
+  backup_dir: "./backups"
